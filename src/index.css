@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Volkhov:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+@import "tailwindcss";
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem; /* 16px */
+}
+
+@theme {
+  --color-heading: #484848;
+  --color-paragraph: #8a8a8a;
+  --color-gold: #fca120;
+  --color-red: #ff4646;
+
+  --font-volkhov: "Volkhov", serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-jost: "Jost", sans-serif;
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 82rem;
+
+
+}
+
+@layer base {
+  a {
+    @apply inline-block;
+  }
+  
+}
+@layer utilities {
+  .active {
+    background-color: black;
+    color: white;
+  }
+}
+
+@utility common_button_black {
+  @apply py-5 px-11.25 text-white bg-black rounded-[10px] font-poppins font-normal text-[16px] leading-[100%] shadow-none hover:shadow-[0_20px_35px_0_rgba(0,0,0,0.15)] transition-all duration-300 cursor-pointer;
+}
