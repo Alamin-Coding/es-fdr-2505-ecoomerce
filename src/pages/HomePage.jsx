@@ -1,9 +1,14 @@
-import React from 'react'
+import React from "react";
+import Brand from "../components/Brand";
+import Banner from "../components/Banner";
 
 const HomePage = () => {
-  return (
-    <div>HomePage</div>
-  )
-}
+	return (
+		<>
+			<Banner />
+			<Brand />
+		</>
+	);
+};
 
-export default HomePage
+export default HomePage;
