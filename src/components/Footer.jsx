@@ -1,38 +1,63 @@
-import React from "react";
 import { Link } from "react-router";
+import { v4 as uuidv4 } from "uuid";
+
+const menu = [
+  {
+    id: uuidv4(),
+    text: "Support Center",
+    link: "support center",
+  },
+  {
+    id: uuidv4(),
+    text: "Invoicing",
+    link: "invoicing",
+  },
+  {
+    id: uuidv4(),
+    text: "Contract",
+    link: "contract",
+  },
+  {
+    id: uuidv4(),
+    text: "Careers",
+    link: "careers",
+  },
+  {
+    id: uuidv4(),
+    text: "Blog",
+    link: "blog",
+  },
+  {
+    id: uuidv4(),
+    text: "FAQ,s",
+    link: "faq,s",
+  },
+];
 
 const Footer = () => {
-	return (
-		<footer>
-			<div className="container">
-				<div className="flex items-center justify-between gap-6">
-					<Link to="/">
-						<img src="/logo.svg" alt="logo" />
-					</Link>
-					<ul className="flex items-center gap-3">
-						<li>
-							<Link to="/">Support Center</Link>
-						</li>
-						<li>
-							<Link to="/">Invoicing</Link>
-						</li>
-						<li>
-							<Link to="/">Contract</Link>
-						</li>
-						<li>
-							<Link to="/">Careers</Link>
-						</li>
-						<li>
-							<Link to="/">Blog</Link>
-						</li>
-						<li>
-							<Link to="/">FAQ,s</Link>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</footer>
-	);
+  return (
+    <footer className="mt-7.5 mb-5.75">
+      <div className="container">
+        <div className="flex items-center justify-between gap-[577px]">
+          <Link to="/">
+            <img src="/FooterLogo.svg" alt="logo" />
+          </Link>
+          <div>
+            <ul className="flex justify-end gap-[38px] items-center">
+              {menu?.map((item) => (
+                <li
+                  className="text-heading text-[16px] font-poppins leading-auto"
+                  key={item.id}
+                >
+                  <Link to={item.link}>{item.text}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

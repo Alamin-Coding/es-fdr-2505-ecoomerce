@@ -22,15 +22,12 @@
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 82rem;
-
-
 }
 
 @layer base {
   a {
     @apply inline-block;
   }
-  
 }
 @layer utilities {
   .active {
