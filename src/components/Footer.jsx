@@ -55,6 +55,9 @@ const Footer = () => {
             </ul>
           </div>
         </div>
+        <p className="pt-[50px] text-3 text-[#484848] font-poppins leading-[26px] text-center">
+          Copyright © 2022 Xpro . All Rights Reseved.
+        </p>
       </div>
     </footer>
   );

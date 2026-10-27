@@ -30,20 +30,20 @@ const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 
 
 const easeOut = t => 1 - Math.pow(1 - t, 3);
 
-const smootherstep = t => t * t * t * (t * (t * 6 - 15) + 10);
+// const smootherstep = t => t * t * t * (t * (t * 6 - 15) + 10);
 
-const fadeMask = (size, vertical) => {
-  const span = clamp(size, 0, 0.5) * 100;
-  if (span <= 0) return undefined;
-  const stops = [];
-  for (let i = 0; i <= 12; i++) {
-    stops.push(`rgba(0,0,0,${smootherstep(i / 12).toFixed(4)}) ${((span * i) / 12).toFixed(3)}%`);
-  }
-  for (let i = 12; i >= 0; i--) {
-    stops.push(`rgba(0,0,0,${smootherstep(i / 12).toFixed(4)}) ${(100 - (span * i) / 12).toFixed(3)}%`);
-  }
-  return `linear-gradient(${vertical ? 'to bottom' : 'to right'}, ${stops.join(', ')})`;
-};
+// const fadeMask = (size, vertical) => {
+//   const span = clamp(size, 0, 0.5) * 100;
+//   if (span <= 0) return undefined;
+//   const stops = [];
+//   for (let i = 0; i <= 12; i++) {
+//     stops.push(`rgba(0,0,0,${smootherstep(i / 12).toFixed(4)}) ${((span * i) / 12).toFixed(3)}%`);
+//   }
+//   for (let i = 12; i >= 0; i--) {
+//     stops.push(`rgba(0,0,0,${smootherstep(i / 12).toFixed(4)}) ${(100 - (span * i) / 12).toFixed(3)}%`);
+//   }
+//   return `linear-gradient(${vertical ? 'to bottom' : 'to right'}, ${stops.join(', ')})`;
+// };
 
 const rotationMatrix = (degX, degY) => {
   const a = (degX * Math.PI) / 180;
@@ -1045,7 +1045,7 @@ const LogoLoop = memo(
       [copies, primary, logos, renderItem, labels]
     );
 
-    const mask = fadeOut ? fadeMask(fadeOutWidth, vertical) : undefined;
+    // const mask = fadeOut ? fadeMask(fadeOutWidth, vertical) : undefined;
     const amount = clamp(muted, 0, 1);
 
     const containerStyle = {
@@ -1060,7 +1060,7 @@ const LogoLoop = memo(
         '--logoloop-gray': Math.min(1, amount * 2).toFixed(3),
         '--logoloop-dim': (1 - amount * 0.6).toFixed(3)
       }),
-      ...(mask && { WebkitMaskImage: mask, maskImage: mask }),
+      // ...(mask && { WebkitMaskImage: mask, maskImage: mask }),
       ...style
     };
 
