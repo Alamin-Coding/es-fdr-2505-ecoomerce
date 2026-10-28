@@ -6,7 +6,7 @@ import SignupPage from "./pages/SignupPage";
 import ShopPage from "./pages/ShopPage";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import Root from "./layout/Root";
-import ProductPage from "./pages/ProductPage.jsx";
+import ProductDetailsPage from "./pages/ProductDetailsPage.jsx";
 
 const router = createBrowserRouter([
 	{
@@ -35,8 +35,8 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "/product/:id",
-				element: <ProductPage />,
-			}
+				element: <ProductDetailsPage />,
+			},
 		],
 	},
 ]);

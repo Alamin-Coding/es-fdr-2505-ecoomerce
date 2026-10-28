@@ -12,6 +12,7 @@ import {
 import Swal from "sweetalert2";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link, useParams } from "react-router";
 
 const products = [
 	{
@@ -359,7 +360,11 @@ const ShopPage = () => {
 					{/* Grid Items */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 						{products.map((product) => (
-							<div key={product.id} className="group flex flex-col">
+							<Link
+								to={`/product/${product.id}`}
+								key={product.id}
+								className="group flex flex-col"
+							>
 								<div className="relative overflow-hidden bg-gray-100 rounded mb-3 aspect-[3/4]">
 									<img
 										src={product.image}
@@ -397,7 +402,7 @@ const ShopPage = () => {
 										))}
 									</div>
 								</div>
-							</div>
+							</Link>
 						))}
 					</div>
 
