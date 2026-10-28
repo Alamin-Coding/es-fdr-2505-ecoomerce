@@ -1,10 +1,15 @@
-import React from 'react'
-import ProductDetail from '../components/ProductDetail'
+import React from "react";
+import { useOutletContext } from "react-router";
+import ProductDetail from "../components/ProductDetail";
 
 const ProductPage = () => {
-  return (
-    <div><ProductDetail /></div>
-  )
-}
+  const { handleAddToCart } = useOutletContext();
 
-export default ProductPage
+  return (
+    <div>
+      <ProductDetail onAddToCart={handleAddToCart} />
+    </div>
+  );
+};
+
+export default ProductPage;
