@@ -4,8 +4,19 @@
 
 @utility container {
   margin-inline: auto;
-  padding-inline: 1rem; /* 16px */
+  /* padding-inline: 1rem; 16px */
+
+  @apply mx-auto;
+
+	--breakpoint-*: initial;
+	--breakpoint-sm: 570px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 1020px;
+	--breakpoint-xl: 1320px;
+	--color-primary: #8750f7;
+	--color-secondary: #140c1c;
 }
+
 
 @theme {
   --color-heading: #484848;
@@ -39,3 +50,4 @@
 @utility common_button_black {
   @apply py-5 px-11.25 text-white bg-black rounded-[10px] font-poppins font-normal text-[16px] leading-[100%] shadow-none hover:shadow-[0_20px_35px_0_rgba(0,0,0,0.15)] transition-all duration-300 cursor-pointer;
 }
+

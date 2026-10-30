@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import { 
   FiHeart, 
   FiEye, 
@@ -18,6 +18,7 @@ import {
   FaCcDiscover, 
   FaCcJcb 
 } from 'react-icons/fa';
+import { useState } from 'react';
 
 const ProductDetail = () => {
   // Mock Image List
