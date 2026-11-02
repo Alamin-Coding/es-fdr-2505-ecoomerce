@@ -7,25 +7,17 @@ import {
   FiRotateCcw,
   FiHelpCircle,
   FiMinus,
-  FiPlus,
-} from "react-icons/fi";
-import { AiOutlineSwap, AiFillStar, AiOutlineStar } from "react-icons/ai";
-import { HiOutlineShieldCheck } from "react-icons/hi";
-import {
-  FaCcVisa,
-  FaCcMastercard,
-  FaCcAmex,
-  FaCcDiscover,
-  FaCcJcb,
-} from "react-icons/fa";
-
-import product1 from "../../image/product-2.jpg";
-import product2 from "../../image/product-1.jpg";
-import product3 from "../../image/product-3.jpg";
-import product4 from "../../image/product-4.jpg";
-import product5 from "../../image/product-5.jpg";
-import product6 from "../../image/product-6.jpg";
-import product7 from "../../image/product-7.jpg";
+  FiPlus
+} from 'react-icons/fi';
+import { AiOutlineSwap, AiFillStar, AiOutlineStar } from 'react-icons/ai';
+import { HiOutlineShieldCheck } from 'react-icons/hi';
+import { 
+  FaCcVisa, 
+  FaCcMastercard, 
+  FaCcAmex, 
+  FaCcDiscover, 
+  FaCcJcb 
+} from 'react-icons/fa';
 
 const ProductDetail = ({ onAddToCart }) => {
   // লোকাল ইম্পোর্ট করা ইমেজের অ্যারে

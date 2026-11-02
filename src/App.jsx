@@ -1,12 +1,16 @@
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import ShopPage from "./pages/ShopPage";
+
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import Root from "./layout/Root";
+
 import ProductDetailsPage from "./pages/ProductDetailsPage.jsx";
+
+import Deals from "./pages/Deals.jsx";
+import NewArraivals from "./pages/NewArraivals.jsx";
+import ShopPage from "./pages/ShopPage.jsx";
 
 const router = createBrowserRouter([
 	{
@@ -18,16 +22,20 @@ const router = createBrowserRouter([
 				element: <HomePage />,
 			},
 			{
-				path: "/shop",
-				element: <ShopPage />,
+				path: "/Deals",
+				element: <Deals />,
 			},
 			{
-				path: "/login",
-				element: <LoginPage />,
+				path: "/NewArrivals",
+				element: <NewArraivals />,
 			},
 			{
 				path: "/signup",
 				element: <SignupPage />,
+			},
+			{
+				path: "/shop",
+				element: <ShopPage />,
 			},
 			{
 				path: "*",

@@ -1,12 +1,17 @@
 import Brand from "../components/Brand";
 import Banner from "../components/Banner";
-import ProductDetail from "../components/ProductDetail";
+import Deals from "../pages/Deals"
+import NewArraivals from "./NewArraivals";
+
 
 const HomePage = () => {
   return (
     <>
       <Banner />
       <Brand />
+
+      <Deals/>
+      <NewArraivals/>
     </>
   );
 };
