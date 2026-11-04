@@ -5,13 +5,14 @@ import NewArraivals from "./NewArraivals";
 
 
 const HomePage = () => {
+  const testData = 10
   return (
     <>
       <Banner />
       <Brand />
 
       <Deals/>
-      <NewArraivals/>
+      <NewArraivals dataProps={testData}/>
     </>
   );
 };

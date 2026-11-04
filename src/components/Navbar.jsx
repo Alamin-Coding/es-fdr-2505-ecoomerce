@@ -48,6 +48,7 @@ const Navbar = () => {
 								</li>
 							))}
 							<button className="common_button_black">Sign Up</button>
+							<button></button>
 						</ul>
 					</div>
 				</div>

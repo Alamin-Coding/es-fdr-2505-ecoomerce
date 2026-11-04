@@ -134,7 +134,7 @@ function ProductCard({ product }) {
   );
 }
 
-export default function Arrivals() {
+export default function Arrivals({anoterProps}) {
   const [activeTab, setActiveTab] = useState(1);
 
   return (
@@ -154,7 +154,7 @@ export default function Arrivals() {
                   : "bg-[#FAFAFA] text-[#8A8A8A] shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:bg-[#F0F0F0F0]"
               }`}
             >
-              {tab}
+              {tab} {anoterProps}
             </button>
           );
         })}

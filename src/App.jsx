@@ -11,6 +11,9 @@ import ProductDetailsPage from "./pages/ProductDetailsPage.jsx";
 import Deals from "./pages/Deals.jsx";
 import NewArraivals from "./pages/NewArraivals.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
+import AuthLayout from "./layout/AuthLayout.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import CartPage from "./pages/CartPage.jsx";
 
 const router = createBrowserRouter([
 	{
@@ -30,22 +33,35 @@ const router = createBrowserRouter([
 				element: <NewArraivals />,
 			},
 			{
-				path: "/signup",
-				element: <SignupPage />,
-			},
-			{
 				path: "/shop",
 				element: <ShopPage />,
-			},
-			{
-				path: "*",
-				element: <NotFoundPage />,
 			},
 			{
 				path: "/product/:id",
 				element: <ProductDetailsPage />,
 			},
+			{
+				path: "/cart",
+				element: <CartPage />,
+			},
 		],
+	},
+	{
+		element: <AuthLayout />,
+		children: [
+			{
+				path: "/login",
+				element: <LoginPage />,
+			},
+			{
+				path: "/signup",
+				element: <SignupPage />,
+			},
+		],
+	},
+	{
+		path: "*",
+		element: <NotFoundPage />,
 	},
 ]);
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	FiSearch,
 	FiUser,
@@ -13,92 +13,93 @@ import Swal from "sweetalert2";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link, useParams } from "react-router";
+import { ThemeContext } from "../context/ThemeContext";
 
-const products = [
-	{
-		id: 1,
-		title: "Rounded Red Hat",
-		price: 8.0,
-		oldPrice: null,
-		image: "/1.png",
-		colors: ["#e63946", "#000000"],
-	},
-	{
-		id: 2,
-		title: "Linen Blend Shirt",
-		price: 17.0,
-		oldPrice: null,
-		image: "/2.png",
-		colors: ["#f4a261", "#e76f51"],
-	},
-	{
-		id: 3,
-		title: "Long-sleeve Coat",
-		price: 106.0,
-		oldPrice: null,
-		image: "/3.png",
-		colors: ["#000000", "#2a9d8f"],
-	},
-	{
-		id: 4,
-		title: "Boxy Denim Hat",
-		price: 25.0,
-		oldPrice: null,
-		image: "/4.png",
-		colors: ["#a8ded6", "#1d3557"],
-	},
-	{
-		id: 5,
-		title: "Linen Plain Top",
-		price: 25.0,
-		oldPrice: null,
-		image: "/5.png",
-		colors: ["#d8e2dc", "#84a59d"],
-	},
-	{
-		id: 6,
-		title: "Oversized T-shirt",
-		price: 11.0,
-		oldPrice: 14.0,
-		image: "/6.png",
-		colors: ["#ffb703", "#fb8500"],
-	},
-	{
-		id: 7,
-		title: "Polarized Sunglasses",
-		price: 18.0,
-		oldPrice: 21.0,
-		image: "/7.png",
-		colors: ["#e63946", "#457b9d"],
-	},
-	{
-		id: 8,
-		title: "Rockstar Jacket",
-		price: 22.0,
-		oldPrice: null,
-		image: "/8.png",
-		colors: ["#2b2d42", "#8d99ae"],
-	},
-	{
-		id: 9,
-		title: "Dotted Black Dress",
-		price: 20.0,
-		oldPrice: null,
-		image: "/9.png",
-		colors: ["#111111", "#555555"],
-	},
-];
+// const products = [
+// 	{
+// 		id: 1,
+// 		title: "Rounded Red Hat",
+// 		price: 8.0,
+// 		oldPrice: null,
+// 		image: "/1.png",
+// 		colors: ["#e63946", "#000000"],
+// 	},
+// 	{
+// 		id: 2,
+// 		title: "Linen Blend Shirt",
+// 		price: 17.0,
+// 		oldPrice: null,
+// 		image: "/2.png",
+// 		colors: ["#f4a261", "#e76f51"],
+// 	},
+// 	{
+// 		id: 3,
+// 		title: "Long-sleeve Coat",
+// 		price: 106.0,
+// 		oldPrice: null,
+// 		image: "/3.png",
+// 		colors: ["#000000", "#2a9d8f"],
+// 	},
+// 	{
+// 		id: 4,
+// 		title: "Boxy Denim Hat",
+// 		price: 25.0,
+// 		oldPrice: null,
+// 		image: "/4.png",
+// 		colors: ["#a8ded6", "#1d3557"],
+// 	},
+// 	{
+// 		id: 5,
+// 		title: "Linen Plain Top",
+// 		price: 25.0,
+// 		oldPrice: null,
+// 		image: "/5.png",
+// 		colors: ["#d8e2dc", "#84a59d"],
+// 	},
+// 	{
+// 		id: 6,
+// 		title: "Oversized T-shirt",
+// 		price: 11.0,
+// 		oldPrice: 14.0,
+// 		image: "/6.png",
+// 		colors: ["#ffb703", "#fb8500"],
+// 	},
+// 	{
+// 		id: 7,
+// 		title: "Polarized Sunglasses",
+// 		price: 18.0,
+// 		oldPrice: 21.0,
+// 		image: "/7.png",
+// 		colors: ["#e63946", "#457b9d"],
+// 	},
+// 	{
+// 		id: 8,
+// 		title: "Rockstar Jacket",
+// 		price: 22.0,
+// 		oldPrice: null,
+// 		image: "/8.png",
+// 		colors: ["#2b2d42", "#8d99ae"],
+// 	},
+// 	{
+// 		id: 9,
+// 		title: "Dotted Black Dress",
+// 		price: 20.0,
+// 		oldPrice: null,
+// 		image: "/9.png",
+// 		colors: ["#111111", "#555555"],
+// 	},
+// ];
 
 const ShopPage = () => {
-	const [cart, setCart] = useState([]);
-
-	const handleAddToCart = (product) => {
-		setCart((prev) => [...prev, product]);
-		toast.success(`${product.title} karte jukta kora hoyeche!`, {
-			position: "bottom-right",
-			autoClose: 2000,
-		});
-	};
+	const [products, setProduct] = useState([]);
+	const {setCart} = useContext(ThemeContext)
+	useEffect(() => {
+		fetch(`https://dummyjson.com/products`)
+			.then((res) => res.json())
+			.then((data) => {
+				setProduct(data.products);
+			});
+	}, []);
 
 	const handleFilterClick = (type, value) => {
 		Swal.fire({
@@ -110,51 +111,13 @@ const ShopPage = () => {
 		});
 	};
 
+	const handleAddToCart = (product)=> {
+		setCart((prev)=> [...prev, {...product, quantity:1}])
+	}
+
 	return (
 		<div className="w-full min-h-screen bg-white">
 			<ToastContainer />
-
-			{/* HEADER SECTION */}
-			<header className="max-w-[1280px] mx-auto px-6 py-6 flex items-center justify-between border-b border-gray-100">
-				<div className="w-[171px] text-3xl font-extrabold tracking-widest text-black font-volkhov">
-					FASCO
-				</div>
-
-				<nav className="hidden md:flex space-x-10 text-sm font-medium text-gray-600">
-					<a href="/" className="hover:text-black transition">
-						Home
-					</a>
-					<a href="/shop" className="text-black font-semibold">
-						Shop
-					</a>
-					<a href="#" className="hover:text-black transition">
-						Products
-					</a>
-					<a href="#" className="hover:text-black transition">
-						Pages
-					</a>
-				</nav>
-
-				<div className="w-[182px] flex items-center justify-end space-x-5 text-xl text-gray-800">
-					<button className="hover:opacity-75">
-						<FiSearch />
-					</button>
-					<button className="hover:opacity-75">
-						<FiUser />
-					</button>
-					<button className="hover:opacity-75">
-						<FiHeart />
-					</button>
-					<button className="relative hover:opacity-75">
-						<FiShoppingBag />
-						{cart.length > 0 && (
-							<span className="absolute -top-2 -right-2 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-								{cart.length}
-							</span>
-						)}
-					</button>
-				</div>
-			</header>
 
 			{/* BREADCRUMB & TITLE */}
 			<div className="text-center py-10">
@@ -359,25 +322,24 @@ const ShopPage = () => {
 
 					{/* Grid Items */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-						{products.map((product) => (
-							<Link
-								to={`/product/${product.id}`}
-								key={product.id}
-								className="group flex flex-col"
-							>
-								<div className="relative overflow-hidden bg-gray-100 rounded mb-3 aspect-[3/4]">
+						{products?.map((product) => (
+							<div key={product.id} className="group flex flex-col relative">
+								<Link
+									to={`/product/${product.id}`}
+									className="relative overflow-hidden bg-gray-100 rounded mb-3 aspect-[3/4]"
+								>
 									<img
-										src={product.image}
+										src={product.thumbnail}
 										alt={product.title}
 										className="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500"
 									/>
-									<button
-										onClick={() => handleAddToCart(product)}
-										className="absolute bottom-3 left-3 right-3 bg-black text-white text-xs py-2.5 rounded opacity-0 group-hover:opacity-100 transition duration-300 font-medium"
-									>
-										Add to Cart
-									</button>
-								</div>
+								</Link>
+								<button
+									onClick={() => handleAddToCart(product)}
+									className="absolute bottom-18 cursor-pointer left-3 right-3 bg-black text-white text-xs py-2.5 rounded opacity-0 group-hover:opacity-100 transition duration-300 font-medium"
+								>
+									Add to Cart
+								</button>
 								<div>
 									<h3 className="text-xs font-semibold text-gray-900 mb-1">
 										{product.title}
@@ -386,23 +348,27 @@ const ShopPage = () => {
 										<span className="text-xs font-bold text-gray-900">
 											${product.price.toFixed(2)}
 										</span>
-										{product.oldPrice && (
+										{product.discountPercentage && (
 											<span className="text-[10px] text-gray-400 line-through">
-												${product.oldPrice.toFixed(2)}
+												$
+												{(
+													product.price /
+													(1 - product.discountPercentage / 100)
+												).toFixed(2)}
 											</span>
 										)}
 									</div>
 									<div className="flex space-x-2">
-										{product.colors.map((c, i) => (
+										{/* {product.colors.map((c, i) => (
 											<span
 												key={i}
 												className="w-5 h-5 rounded-full border border-gray-300 shadow-sm"
 												style={{ backgroundColor: c }}
 											/>
-										))}
+										))} */}
 									</div>
 								</div>
-							</Link>
+							</div>
 						))}
 					</div>
 
