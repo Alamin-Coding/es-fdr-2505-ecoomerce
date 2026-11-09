@@ -1,174 +1,198 @@
-import React, { useState } from "react";
-
+import { useContext, useState } from "react";
+import { Link } from "react-router";
 import { FiMinus, FiPlus } from "react-icons/fi";
+import Swal from "sweetalert2";
 import ProductDetail from "../components/ProductDetail";
+import { ThemeContext } from "../context/ThemeContextValue";
 
 const ProductDetailsPage = () => {
+	const { cart, setCart, giftWrap, setGiftWrap } = useContext(ThemeContext);
 	const [isCartOpen, setIsCartOpen] = useState(false);
-	const [cartItems, setCartItems] = useState([]);
-	const [isWrapped, setIsWrapped] = useState(false);
 
-	// 🛒 Add to cart হ্যান্ডলার
 	const handleAddToCart = (product) => {
-		setCartItems((prevItems) => {
-			// যদি একই প্রোডাক্ট আগে থেকেই থাকে, তবে কোয়ান্টিটি বাড়াবে
-			const existingIndex = prevItems.findIndex(
-				(item) => item.size === product.size && item.color === product.color,
+		const lineId = `${product.id}-${product.selectedSize}-${product.selectedColor}`;
+		const currentItem = cart.find(
+			(item) =>
+				(item.lineId ?? `${item.id}-${item.selectedSize ?? ""}-${item.selectedColor ?? ""}`) === lineId,
+		);
+		const availableStock = Math.max(0, product.stock - (currentItem?.quantity ?? 0));
+
+		if (availableStock === 0) {
+			Swal.fire({
+				title: "Stock limit reached",
+				text: "The requested quantity is not available in stock.",
+				icon: "info",
+				confirmButtonText: "OK",
+			});
+			return;
+		}
+
+		const quantityToAdd = Math.min(product.quantity, availableStock);
+		setCart((items) => {
+			const index = items.findIndex(
+				(item) =>
+					(item.lineId ?? `${item.id}-${item.selectedSize ?? ""}-${item.selectedColor ?? ""}`) === lineId,
 			);
-			if (existingIndex > -1) {
-				const newItems = [...prevItems];
-				newItems[existingIndex].quantity += product.quantity;
-				return newItems;
+
+			if (index === -1) {
+				return [...items, { ...product, lineId, quantity: quantityToAdd }];
 			}
-			return [...prevItems, product];
+
+			return items.map((item, itemIndex) =>
+				itemIndex === index ?
+					{ ...item, quantity: item.quantity + quantityToAdd }
+				:	item,
+			);
 		});
-		setIsCartOpen(true); // 🚀 সাইডবার ওপেন হবে
+		setIsCartOpen(true);
 	};
 
-	// কার্টের ভেতরে কোয়ান্টিটি বাড়ানোর বা কমানোর হ্যান্ডলার
-	const handleItemQuantity = (index, type) => {
-		setCartItems((prevItems) => {
-			const newItems = [...prevItems];
-			if (type === "increase") {
-				newItems[index].quantity += 1;
-			} else if (type === "decrease" && newItems[index].quantity > 1) {
-				newItems[index].quantity -= 1;
-			}
-			return newItems;
-		});
+	const updateCartQuantity = (lineId, delta) => {
+		setCart((items) =>
+			items.map((item) => {
+				const itemLineId =
+					item.lineId ?? `${item.id}-${item.selectedSize ?? ""}-${item.selectedColor ?? ""}`;
+				if (itemLineId !== lineId) {
+					return item;
+				}
+				return {
+					...item,
+					quantity: Math.min(item.stock ?? Infinity, Math.max(1, item.quantity + delta)),
+				};
+			}),
+		);
 	};
 
-	// সাবটোটাল ক্যালকুলেশন (গিফট র‍্যাপ সহ যদি সিলেক্ট থাকে)
-	const itemsSubtotal = cartItems.reduce(
-		(acc, item) => acc + item.price * item.quantity,
+	const itemsSubtotal = cart.reduce(
+		(total, item) => total + Number(item.price) * item.quantity,
 		0,
 	);
-	const wrapCost = isWrapped ? 10.0 : 0.0;
-	const totalAmount = itemsSubtotal - wrapCost;
+	const wrapCost = giftWrap && cart.length > 0 ? 10 : 0;
 
 	return (
 		<>
 			<ProductDetail onAddToCart={handleAddToCart} />
 
-			{/* 🛒 Minichart Sidebar Drawer (Matched with design) */}
 			{isCartOpen && (
-				<div className="fixed inset-0 z-50 flex justify-end bg-black/50 transition-opacity">
-					<div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 relative animate-slide-left font-sans">
-						{/* Header: Shopping Cart & Close Button */}
-						<div className="flex justify-between items-center pb-4 border-b">
-							<h2 className="text-2xl font-serif font-bold text-gray-900 font-volkhov">
-								Shopping Cart
+				<div
+					className="fixed inset-0 z-50 flex justify-end bg-black/50"
+					onMouseDown={(event) => {
+						if (event.target === event.currentTarget) {
+							setIsCartOpen(false);
+						}
+					}}
+				>
+					<aside
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="cart-drawer-title"
+						className="flex h-full w-full max-w-md flex-col bg-white p-6 shadow-2xl"
+					>
+						<div className="flex items-center justify-between border-b pb-4">
+							<h2 id="cart-drawer-title" className="text-2xl font-bold text-gray-900">
+								Shopping Cart ({cart.reduce((count, item) => count + item.quantity, 0)})
 							</h2>
 							<button
+								type="button"
 								onClick={() => setIsCartOpen(false)}
-								className="text-gray-400 hover:text-black text-xl cursor-pointer p-1"
+								aria-label="Close shopping cart"
+								className="p-1 text-xl text-gray-500 hover:text-black"
 							>
-								✕
+								×
 							</button>
 						</div>
 
-						{/* Free Shipping Banner Text */}
-						<div className="py-3 text-sm text-gray-800 border-b font-poppins">
-							Buy <span className="font-bold">$122.35</span> More And Get{" "}
-							<span className="font-bold">Free Shipping</span>
-						</div>
+						{cart.length > 0 && (
+							<p className="border-b py-3 text-sm text-gray-700">
+								{itemsSubtotal >= 75 ?
+									"You qualify for free shipping."
+								:	`Add $${(75 - itemsSubtotal).toFixed(2)} more for free shipping.`}
+							</p>
+						)}
 
-						{/* Cart Product List */}
-						<div className="flex-1 overflow-y-auto py-4 space-y-6">
-							{cartItems.length === 0 ?
-								<p className="text-gray-500 text-center mt-20 font-poppins">
-									Your cart is empty
-								</p>
-							:	cartItems.map((item, index) => (
-									<div
-										key={index}
-										className="flex gap-4 pb-4 border-b items-start"
-									>
-										<img
-											src={item.image}
-											alt={item.title}
-											className="w-20 h-24 object-cover rounded-md border"
-										/>
-										<div className="flex-1">
-											<div className="flex justify-between">
-												<h4 className="font-semibold text-gray-900 font-volkhov">
-													{item.title}
-												</h4>
-											</div>
-											<p className="text-xs text-gray-500 mt-0.5 font-poppins">
-												Color : {item.color} | Size : {item.size}
-											</p>
-											<p className="font-bold text-gray-900 mt-1 font-volkhov">
-												${(item.price * item.quantity).toFixed(2)}
-											</p>
-
-											{/* Quantity Counter Inside Cart */}
-											<div className="flex items-center border border-gray-200 rounded bg-gray-50 w-24 justify-between px-2 py-1 mt-2">
+						<div className="flex-1 space-y-5 overflow-y-auto py-4">
+							{cart.length === 0 ?
+								<p className="mt-16 text-center text-gray-500">Your cart is empty.</p>
+							:	cart.map((item) => {
+									const lineId =
+										item.lineId ?? `${item.id}-${item.selectedSize ?? ""}-${item.selectedColor ?? ""}`;
+									return (
+										<div key={lineId} className="flex items-start gap-4 border-b pb-4">
+											<img
+												src={item.thumbnail ?? item.images?.[0]}
+												alt={item.title}
+												className="h-24 w-20 rounded border object-cover"
+											/>
+											<div className="min-w-0 flex-1">
+												<h3 className="font-semibold text-gray-900">{item.title}</h3>
+												{(item.selectedSize || item.selectedColor) && (
+													<p className="mt-1 text-xs text-gray-500">
+														{item.selectedColor && `Color: ${item.selectedColor}`}
+														{item.selectedColor && item.selectedSize && " | "}
+														{item.selectedSize && `Size: ${item.selectedSize}`}
+													</p>
+												)}
+												<p className="mt-1 font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+												<div className="mt-2 flex w-24 items-center justify-between rounded border px-2 py-1">
+													<button
+														type="button"
+														onClick={() => updateCartQuantity(lineId, -1)}
+														disabled={item.quantity <= 1}
+														aria-label={`Decrease ${item.title} quantity`}
+														className="text-gray-500 hover:text-black disabled:opacity-40"
+													>
+														<FiMinus className="h-3 w-3" />
+													</button>
+													<span className="text-xs font-semibold">{item.quantity}</span>
+													<button
+														type="button"
+														onClick={() => updateCartQuantity(lineId, 1)}
+														disabled={item.quantity >= (item.stock ?? Infinity)}
+														aria-label={`Increase ${item.title} quantity`}
+														className="text-gray-500 hover:text-black disabled:opacity-40"
+													>
+														<FiPlus className="h-3 w-3" />
+													</button>
+												</div>
 												<button
-													onClick={() => handleItemQuantity(index, "decrease")}
-													className="text-gray-500 hover:text-black cursor-pointer"
+													type="button"
+													onClick={() => setCart((items) => items.filter((cartItem) =>
+														(cartItem.lineId ?? `${cartItem.id}-${cartItem.selectedSize ?? ""}-${cartItem.selectedColor ?? ""}`) !== lineId,
+													))}
+													className="mt-2 text-xs text-gray-500 underline hover:text-black"
 												>
-													<FiMinus className="w-3 h-3" />
-												</button>
-												<span className="text-xs font-semibold">
-													{item.quantity < 10 ?
-														`0${item.quantity}`
-													:	item.quantity}
-												</span>
-												<button
-													onClick={() => handleItemQuantity(index, "increase")}
-													className="text-gray-500 hover:text-black cursor-pointer"
-												>
-													<FiPlus className="w-3 h-3" />
+													Remove
 												</button>
 											</div>
 										</div>
-									</div>
-								))
+									);
+								})
 							}
 						</div>
 
-						{/* Gift Wrap Checkbox Option */}
-						<div className="py-3 border-t border-b flex items-center gap-3 text-sm font-poppins">
+						<label className="flex items-center gap-3 border-y py-3 text-sm text-gray-700">
 							<input
 								type="checkbox"
-								id="giftWrap"
-								checked={isWrapped}
-								onChange={(e) => setIsWrapped(e.target.checked)}
-								className="w-4 h-4 accent-black cursor-pointer"
+								checked={giftWrap}
+								onChange={(event) => setGiftWrap(event.target.checked)}
+								disabled={cart.length === 0}
+								className="h-4 w-4 accent-black"
 							/>
-							<label
-								htmlFor="giftWrap"
-								className="text-gray-700 cursor-pointer text-xs sm:text-sm"
-							>
-								For <span className="font-semibold text-black">$10.00</span>{" "}
-								Please Wrap The Product
-							</label>
-						</div>
+							For <strong>$10.00</strong> please wrap the products
+						</label>
 
-						{/* Subtotal Section */}
-						<div className="py-4 flex justify-between items-center font-volkhov">
-							<span className="text-lg font-medium text-gray-800">
-								Subtotal
-							</span>
-							<span className="text-lg font-bold text-gray-900">
-								${totalAmount.toFixed(2)}
-							</span>
+						<div className="flex items-center justify-between py-4 text-lg">
+							<span>Subtotal</span>
+							<strong>${(itemsSubtotal + wrapCost).toFixed(2)}</strong>
 						</div>
-
-						{/* Checkout & View Cart Buttons */}
-						<div className="space-y-2 pt-2">
-							<button className="w-full bg-black text-white py-3 rounded-[10px] font-semibold hover:bg-gray-800 transition shadow-[0_10px_20px_rgba(0,0,0,0.15)] cursor-pointer font-poppins text-sm">
-								Checkout
-							</button>
-							<button
-								onClick={() => setIsCartOpen(false)}
-								className="w-full text-center text-sm font-semibold text-black py-2 hover:underline cursor-pointer font-poppins"
-							>
-								View Cart
-							</button>
-						</div>
-					</div>
+						<Link
+							to="/cart"
+							onClick={() => setIsCartOpen(false)}
+							className="rounded-lg bg-black py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
+						>
+							View cart
+						</Link>
+					</aside>
 				</div>
 			)}
 		</>

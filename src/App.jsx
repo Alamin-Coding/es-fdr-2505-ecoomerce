@@ -14,6 +14,7 @@ import ShopPage from "./pages/ShopPage.jsx";
 import AuthLayout from "./layout/AuthLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
+import CheckoutPage from "./pages/CheckoutPage.jsx";
 
 const router = createBrowserRouter([
 	{
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
 			{
 				path: "/cart",
 				element: <CartPage />,
+			},
+			{
+				path: "/checkout",
+				element: <CheckoutPage />,
 			},
 		],
 	},

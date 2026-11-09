@@ -1,19 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-	FiSearch,
-	FiUser,
-	FiHeart,
-	FiShoppingBag,
-	FiCheckCircle,
-	FiShield,
-	FiTruck,
-	FiHeadphones,
-} from "react-icons/fi";
+import { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Link, useParams } from "react-router";
-import { ThemeContext } from "../context/ThemeContext";
+import { Link } from "react-router";
+import { ThemeContext } from "../context/ThemeContextValue";
 
 // const products = [
 // 	{
@@ -90,16 +78,81 @@ import { ThemeContext } from "../context/ThemeContext";
 // 	},
 // ];
 
+const PRODUCTS_PER_PAGE = 9;
+
 const ShopPage = () => {
-	const [products, setProduct] = useState([]);
-	const {setCart} = useContext(ThemeContext)
+	const [currentPage, setCurrentPage] = useState(1);
+	const [retryCount, setRetryCount] = useState(0);
+	const [pageResult, setPageResult] = useState({
+		page: 0,
+		retryCount: -1,
+		products: [],
+		total: 0,
+		error: "",
+	});
+
+	const { cart, setCart } = useContext(ThemeContext);
+
 	useEffect(() => {
-		fetch(`https://dummyjson.com/products`)
-			.then((res) => res.json())
+		const controller = new AbortController();
+
+		fetch(
+			`https://dummyjson.com/products?limit=${PRODUCTS_PER_PAGE}&skip=${(currentPage - 1) * PRODUCTS_PER_PAGE}`,
+			{ signal: controller.signal },
+		)
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error("Unable to load products. Please try again.");
+				}
+				return response.json();
+			})
 			.then((data) => {
-				setProduct(data.products);
+				if (!Array.isArray(data.products) || !Number.isFinite(data.total)) {
+					throw new Error("The product service returned an invalid response.");
+				}
+				setPageResult({
+					page: currentPage,
+					retryCount,
+					products: data.products,
+					total: data.total,
+					error: "",
+				});
+			})
+			.catch((error) => {
+				if (error.name !== "AbortError") {
+					setPageResult({
+						page: currentPage,
+						retryCount,
+						products: [],
+						total: 0,
+						error: error.message || "Unable to load products. Please try again.",
+					});
+				}
 			});
-	}, []);
+
+		return () => controller.abort();
+	}, [currentPage, retryCount]);
+
+	const isCurrentResult =
+		pageResult.page === currentPage && pageResult.retryCount === retryCount;
+	const products = isCurrentResult ? pageResult.products : [];
+	const totalProducts = pageResult.total;
+	const loadError = isCurrentResult ? pageResult.error : "";
+	const isLoading = !isCurrentResult;
+	const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+	const firstVisiblePage = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+	const visiblePages = Array.from(
+		{ length: Math.min(5, totalPages) },
+		(_, index) => firstVisiblePage + index,
+	);
+
+	const goToPage = (page) => {
+		if (page < 1 || page > totalPages || page === currentPage || isLoading) {
+			return;
+		}
+		setCurrentPage(page);
+		document.getElementById("shop-products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+	};
 
 	const handleFilterClick = (type, value) => {
 		Swal.fire({
@@ -111,14 +164,36 @@ const ShopPage = () => {
 		});
 	};
 
-	const handleAddToCart = (product)=> {
-		setCart((prev)=> [...prev, {...product, quantity:1}])
-	}
+	const handleAddToCart = (product) => {
+		const existingItem = cart.find((item) => item.id === product.id);
+		if (existingItem && existingItem.quantity >= product.stock) {
+			Swal.fire({
+				title: "Stock limit reached",
+				text: "The maximum available quantity is already in your cart.",
+				icon: "info",
+				confirmButtonText: "OK",
+			});
+			return;
+		}
+
+		setCart((items) => {
+			const index = items.findIndex((item) => item.id === product.id);
+			if (index === -1) {
+				return [...items, { ...product, quantity: 1 }];
+			}
+			return items.map((item, itemIndex) =>
+				itemIndex === index ? { ...item, quantity: item.quantity + 1 } : item,
+			);
+		});
+		Swal.fire({
+			title: existingItem ? "Cart quantity updated" : "Product added successfully",
+			icon: "success",
+			confirmButtonText: "OK",
+		});
+	};
 
 	return (
 		<div className="w-full min-h-screen bg-white">
-			<ToastContainer />
-
 			{/* BREADCRUMB & TITLE */}
 			<div className="text-center py-10">
 				<h1 className="text-4xl font-serif font-bold tracking-tight text-gray-900">
@@ -270,10 +345,16 @@ const ShopPage = () => {
 
 				{/* PRODUCT GRID SECTION */}
 				<main className="lg:col-span-3">
+					<div id="shop-products" />
 					{/* Top Control Bar: Showing results strictly LEFT, Best Selling & Icons strictly RIGHT */}
 					<div className="flex flex-wrap justify-between items-center mb-6 gap-4">
 						<div className="text-xs text-gray-500">
-							Showing 1–9 of 18 results
+							{isLoading ? "Loading products..." :
+								totalProducts === 0 ? "No products found" :
+									`Showing ${(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–${Math.min(
+										currentPage * PRODUCTS_PER_PAGE,
+										totalProducts,
+									)} of ${totalProducts} results`}
 						</div>
 
 						<div className="flex items-center space-x-4 ml-auto">
@@ -321,8 +402,23 @@ const ShopPage = () => {
 					</div>
 
 					{/* Grid Items */}
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-						{products?.map((product) => (
+					{loadError ?
+						<div className="py-16 text-center" role="alert">
+							<p className="mb-4 text-sm text-red-600">{loadError}</p>
+							<button
+								type="button"
+								onClick={() => setRetryCount((count) => count + 1)}
+								className="rounded border border-black px-4 py-2 text-sm hover:bg-black hover:text-white"
+							>
+								Retry
+							</button>
+						</div>
+					: isLoading ?
+						<div className="py-16 text-center text-sm text-gray-500" role="status">
+							Loading products...
+						</div>
+					:	<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+						{products.map((product) => (
 							<div key={product.id} className="group flex flex-col relative">
 								<Link
 									to={`/product/${product.id}`}
@@ -370,20 +466,74 @@ const ShopPage = () => {
 								</div>
 							</div>
 						))}
-					</div>
+					</div>}
 
 					{/* Pagination */}
-					<div className="flex justify-center items-center space-x-2 mt-12">
-						<button className="w-8 h-8 border border-black bg-black text-white rounded text-xs font-semibold">
-							1
-						</button>
-						<button className="w-8 h-8 border border-gray-200 text-gray-700 rounded text-xs hover:border-black">
-							2
-						</button>
-						<button className="w-8 h-8 border border-gray-200 text-gray-700 rounded text-xs hover:border-black">
-							&gt;
-						</button>
-					</div>
+					{!loadError && totalPages > 1 && (
+						<nav className="mt-12 flex flex-wrap items-center justify-center gap-2" aria-label="Product pages">
+							<button
+								type="button"
+								onClick={() => goToPage(currentPage - 1)}
+								disabled={currentPage === 1 || isLoading}
+								className="h-9 rounded border border-gray-200 px-3 text-xs text-gray-700 hover:border-black disabled:cursor-not-allowed disabled:opacity-40"
+							>
+								Previous
+							</button>
+							{firstVisiblePage > 1 && (
+								<>
+									<button
+										type="button"
+										onClick={() => goToPage(1)}
+										aria-label="Page 1"
+										className="h-9 w-9 rounded border border-gray-200 text-xs text-gray-700 hover:border-black"
+									>
+										1
+									</button>
+									{firstVisiblePage > 2 && <span className="px-1 text-gray-400" aria-hidden="true">…</span>}
+								</>
+							)}
+							{visiblePages.map((page) => (
+								<button
+									key={page}
+									type="button"
+									onClick={() => goToPage(page)}
+									aria-label={`Page ${page}`}
+									aria-current={currentPage === page ? "page" : undefined}
+									disabled={isLoading}
+									className={`h-9 w-9 rounded border text-xs font-semibold transition disabled:cursor-wait ${
+										currentPage === page ?
+											"border-black bg-black text-white"
+										:	"border-gray-200 text-gray-700 hover:border-black"
+									}`}
+								>
+									{page}
+								</button>
+							))}
+							{visiblePages[visiblePages.length - 1] < totalPages && (
+								<>
+									{visiblePages[visiblePages.length - 1] < totalPages - 1 && (
+										<span className="px-1 text-gray-400" aria-hidden="true">…</span>
+									)}
+									<button
+										type="button"
+										onClick={() => goToPage(totalPages)}
+										aria-label={`Page ${totalPages}`}
+										className="h-9 w-9 rounded border border-gray-200 text-xs text-gray-700 hover:border-black"
+									>
+										{totalPages}
+									</button>
+								</>
+							)}
+							<button
+								type="button"
+								onClick={() => goToPage(currentPage + 1)}
+								disabled={currentPage === totalPages || isLoading}
+								className="h-9 rounded border border-gray-200 px-3 text-xs text-gray-700 hover:border-black disabled:cursor-not-allowed disabled:opacity-40"
+							>
+								Next
+							</button>
+						</nav>
+					)}
 				</main>
 			</div>
 

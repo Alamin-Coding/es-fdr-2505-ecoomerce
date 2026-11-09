@@ -1,13 +1,26 @@
-import { createContext, useState } from "react";
-
-export const ThemeContext = createContext();
+import { useState } from "react";
+import { ThemeContext } from "./ThemeContextValue";
 
 const ContextProvider = ({ children }) => {
-	const [number, setNumber] = useState(0);
 	const [cart, setCart] = useState([]);
 	const [wishlist, setWishlist] = useState([]);
+	const [compare, setCompare] = useState([]);
+	const [giftWrap, setGiftWrap] = useState(false);
 	return (
-		<ThemeContext value={{ number, cart, wishlist, setCart }}>{children}</ThemeContext>
+		<ThemeContext
+			value={{
+				cart,
+				setCart,
+				wishlist,
+				setWishlist,
+				compare,
+				setCompare,
+				giftWrap,
+				setGiftWrap,
+			}}
+		>
+			{children}
+		</ThemeContext>
 	);
 };
 
